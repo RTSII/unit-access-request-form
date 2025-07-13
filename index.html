@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandpiper Run - Unit Access Request</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Signature Pad Library -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Added Dancing Script for typed signatures -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-header {
+            background-image: url('https://i.postimg.cc/XvrW9F0Y/spr8.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .form-input {
+            border: none;
+            border-bottom: 2px solid #D1D5DB;
+            background-color: transparent;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-bottom-color: #3B82F6;
+        }
+        #signature-pad {
+            border: 2px dashed #D1D5DB;
+            border-radius: 0.5rem;
+            cursor: crosshair;
+        }
+        /* Custom Calendar Styles */
+        .calendar-container {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 50;
+            width: 100%; /* Calendar will take the width of its parent */
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 4px; /* Reduced padding */
+            cursor: pointer;
+            border-radius: 9999px;
+            font-size: 0.8rem; /* Smaller font size */
+        }
+        .calendar-day:hover {
+            background-color: #f3f4f6;
+        }
+        .calendar-day.today {
+            background-color: #3B82F6;
+            color: white;
+        }
+        .calendar-day.selected {
+            background-color: #1D4ED8;
+            color: white;
+        }
+        .calendar-day.empty {
+            cursor: default;
+        }
+        .calendar-day-name {
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.7rem; /* Reduced font size */
+            color: #6b7280;
+        }
+        .calendar-header-select {
+            font-size: 0.8rem; /* Smaller select font */
+            padding: 2px 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="hero-header relative h-40 sm:h-48 w-full"></header>
+
+    <div class="w-full max-w-4xl mx-auto p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-12">
+            
+            <div class="flex items-center justify-between gap-4 mb-10 pb-6 border-b-2 border-gray-200">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 whitespace-nowrap">Unit Access Request</h1>
+                <img src="https://i.postimg.cc/ncvxtYTS/spr-logo.jpg" alt="Sandpiper Run Logo" class="w-28 sm:w-32 h-auto flex-shrink-0">
+            </div>
+
+            <form action="#" method="POST">
+                <div class="space-y-8">
+                    <!-- Unit & Owner Info Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="owner-name" class="block text-md font-bold text-gray-700">Owner's Name</label>
+                            <input type="text" id="owner-name" class="form-input w-full mt-1" placeholder="Enter full name">
+                        </div>
+                        <div>
+                            <label for="unit-number" class="block text-md font-bold text-gray-700">Unit #</label>
+                            <input type="text" id="unit-number" class="form-input w-full mt-1" placeholder="e.g., A10">
+                        </div>
+                    </div>
+
+                    <!-- Contact Info Row -->
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="owner-email" class="block text-md font-bold text-gray-700">Owner's Email</label>
+                            <input type="email" id="owner-email" class="form-input w-full mt-1" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="owner-phone" class="block text-md font-bold text-gray-700">Owner's Phone</label>
+                            <input type="tel" id="owner-phone" class="form-input w-full mt-1" placeholder="(XXX) XXX-XXXX">
+                        </div>
+                    </div>
+
+                    <!-- Vendor Info -->
+                    <div>
+                        <label for="vendor-name" class="block text-md font-bold text-gray-700">Vendor / Person Granted Access</label>
+                        <input type="text" id="vendor-name" class="form-input w-full mt-1" placeholder="Enter company or individual's name">
+                    </div>
+
+                    <!-- Date Requested -->
+                    <div class="relative w-full sm:w-1/3">
+                        <label for="date-requested" class="block text-md font-bold text-gray-700">Date Requested</label>
+                        <div class="relative">
+                            <input type="text" id="date-requested" class="form-input w-full mt-1 cursor-pointer" placeholder="MM/DD/YYYY" readonly>
+                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                        <div id="calendar-requested-container" class="calendar-container mt-2">
+                             <div class="flex items-center justify-between p-2 border-b">
+                                <select class="month-select calendar-header-select p-1 border rounded"></select>
+                                <select class="year-select calendar-header-select p-1 border rounded"></select>
+                            </div>
+                            <div class="calendar-body p-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Reason for Access -->
+                    <div>
+                        <label for="reason" class="block text-md font-bold text-gray-700">Reason for Access</label>
+                        <textarea id="reason" rows="4" class="form-input w-full mt-1 rounded-md border-2 border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="Please describe the reason for this request (e.g., HVAC repair, Property listing, etc.)"></textarea>
+                    </div>
+
+                    <!-- Signature & Date -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 pt-6">
+                        <!-- Signature Part -->
+                        <div class="sm:col-span-3">
+                            <label class="block text-md font-bold text-gray-700">Owner's Signature</label>
+                            <input type="text" id="type-signature-input" class="form-input w-full mt-2" placeholder="Type your name to sign...">
+                            <div class="mt-2">
+                                <canvas id="signature-pad" class="w-full" height="150"></canvas>
+                            </div>
+                            <div class="flex items-center gap-4 mt-2">
+                                <button type="button" id="clear-signature" class="text-sm text-blue-600 hover:text-blue-800">Clear</button>
+                                <label for="upload-signature" class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+                                    Upload Signature
+                                    <input type="file" id="upload-signature" class="hidden" accept="image/*">
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Date Part -->
+                        <div class="relative sm:col-span-1">
+                             <label for="signature-date" class="block text-md font-bold text-gray-700">Date</label>
+                             <div class="relative">
+                                <input type="text" id="signature-date" class="form-input w-full mt-1 cursor-pointer" readonly>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
+                                </div>
+                             </div>
+                            <div id="calendar-signature-container" class="calendar-container mt-2">
+                                <div class="flex items-center justify-between p-2 border-b">
+                                    <select class="month-select calendar-header-select p-1 border rounded"></select>
+                                    <select class="year-select calendar-header-select p-1 border rounded"></select>
+                                </div>
+                                <div class="calendar-body p-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <button type="submit" class="bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 shadow-lg">
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Phone Number Auto-Formatting ---
+    const phoneInput = document.getElementById('owner-phone');
+    phoneInput.addEventListener('input', function (e) {
+        let rawValue = e.target.value.replace(/\D/g, '');
+        if (rawValue.length > 10) {
+            rawValue = rawValue.substring(0, 10);
+        }
+
+        let formattedValue = '';
+        if (rawValue.length > 0) {
+            formattedValue = '(' + rawValue.substring(0, 3);
+        }
+        if (rawValue.length >= 4) {
+            formattedValue += ') ' + rawValue.substring(3, 6);
+        }
+        if (rawValue.length >= 7) {
+            formattedValue += '-' + rawValue.substring(6, 10);
+        }
+        e.target.value = formattedValue;
+    });
+
+    // --- Signature Pad Logic ---
+    const canvas = document.getElementById('signature-pad');
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+    const typeSignatureInput = document.getElementById('type-signature-input');
+
+    function resizeCanvas() {
+        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(ratio, ratio);
+        signaturePad.clear(); 
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function drawTextSignature(text) {
+        signaturePad.clear();
+        const ctx = canvas.getContext('2d');
+        ctx.font = "48px 'Dancing Script', cursive";
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.offsetWidth / 2, canvas.offsetHeight / 2);
+    }
+
+    typeSignatureInput.addEventListener('input', function() {
+        drawTextSignature(this.value);
+    });
+
+    signaturePad.addEventListener('beginStroke', () => {
+        typeSignatureInput.value = '';
+    });
+
+    document.getElementById('clear-signature').addEventListener('click', function () {
+        signaturePad.clear();
+        typeSignatureInput.value = '';
+    });
+
+    document.getElementById('upload-signature').addEventListener('change', function(event) {
+        typeSignatureInput.value = '';
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    signaturePad.clear();
+                    const ctx = canvas.getContext('2d');
+                    const scale = Math.min((canvas.width / window.devicePixelRatio) / img.width, (canvas.height / window.devicePixelRatio) / img.height);
+                    const x = ((canvas.width / window.devicePixelRatio) / 2) - (img.width / 2) * scale;
+                    const y = ((canvas.height / window.devicePixelRatio) / 2) - (img.height / 2) * scale;
+                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // --- Reusable Calendar Function ---
+    function initializeCalendar(dateInputElement, calendarContainerElement, options = {}) {
+        const monthSelect = calendarContainerElement.querySelector('.month-select');
+        const yearSelect = calendarContainerElement.querySelector('.year-select');
+        const calendarBody = calendarContainerElement.querySelector('.calendar-body');
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        let selectedDate = options.defaultDate ? new Date(options.defaultDate) : null;
+        if(selectedDate) selectedDate.setHours(0,0,0,0);
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = month;
+            monthSelect.appendChild(option);
+        });
+
+        const startYear = today.getFullYear() - 10;
+        const endYear = today.getFullYear() + 10;
+        for (let i = startYear; i <= endYear; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelect.appendChild(option);
+        }
+
+        function formatDate(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${month}/${day}/${year}`;
+        }
+
+        function generateCalendar(month, year) {
+            calendarBody.innerHTML = '';
+            const firstDayOfMonth = new Date(year, month).getDay();
+            const daysInMonth = 32 - new Date(year, month, 32).getDate();
+
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayNames.forEach(day => {
+                const dayNameEl = document.createElement('div');
+                dayNameEl.className = 'calendar-day-name';
+                dayNameEl.textContent = day;
+                calendarBody.appendChild(dayNameEl);
+            });
+
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarBody.appendChild(document.createElement('div')).className = 'calendar-day empty';
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.textContent = i;
+                const cellDate = new Date(year, month, i);
+
+                if (cellDate.getTime() === today.getTime()) {
+                    dayCell.classList.add('today');
+                }
+                if (selectedDate && cellDate.getTime() === selectedDate.getTime()) {
+                    dayCell.classList.add('selected');
+                }
+
+                dayCell.addEventListener('click', () => {
+                    selectedDate = cellDate;
+                    dateInputElement.value = formatDate(selectedDate);
+                    calendarContainerElement.style.display = 'none';
+                    generateCalendar(currentMonth, currentYear);
+                });
+                calendarBody.appendChild(dayCell);
+            }
+            calendarBody.classList.add('calendar-grid');
+        }
+        
+        monthSelect.addEventListener('change', () => {
+            currentMonth = parseInt(monthSelect.value);
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        yearSelect.addEventListener('change', () => {
+            currentYear = parseInt(yearSelect.value);
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        dateInputElement.addEventListener('click', (event) => {
+            event.stopPropagation();
+            document.querySelectorAll('.calendar-container').forEach(c => c.style.display = 'none');
+            calendarContainerElement.style.display = 'block';
+        });
+        
+        if (selectedDate) {
+            dateInputElement.value = formatDate(selectedDate);
+            currentMonth = selectedDate.getMonth();
+            currentYear = selectedDate.getFullYear();
+        }
+        monthSelect.value = currentMonth;
+        yearSelect.value = currentYear;
+        generateCalendar(currentMonth, currentYear);
+    }
+
+    initializeCalendar(
+        document.getElementById('signature-date'),
+        document.getElementById('calendar-signature-container'),
+        { defaultDate: new Date() }
+    );
+    initializeCalendar(
+        document.getElementById('date-requested'),
+        document.getElementById('calendar-requested-container'),
+        { defaultDate: null }
+    );
+
+    document.addEventListener('click', (event) => {
+        const calendars = document.querySelectorAll('.calendar-container');
+        const dateInputs = document.querySelectorAll('.form-input[readonly]');
+        let targetIsCalendar = false;
+        
+        calendars.forEach(c => {
+            if (c.contains(event.target)) targetIsCalendar = true;
+        });
+        dateInputs.forEach(i => {
+            if (i === event.target) targetIsCalendar = true;
+        });
+
+        if (!targetIsCalendar) {
+            calendars.forEach(c => c.style.display = 'none');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
