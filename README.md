@@ -4,7 +4,7 @@ This is a dynamic, interactive web form designed for owners at Sandpiper Run in 
 
 The form is built with HTML, Tailwind CSS for styling, and JavaScript for interactive features. It connects to a Supabase backend to store all submissions in a secure database.
 
-![Unit Access Form Screenshot]([https://i.postimg.cc/Yq5FM0C7/form-background.jpg))
+![Unit Access Form Screenshot](https://i.postimg.cc/Yq5FM0C7/form-background.jpg))
 
 ---
 
