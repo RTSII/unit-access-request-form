@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandpiper Run - Unit Access Request</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Signature Pad Library -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,6 +86,10 @@
             font-size: 0.8rem; /* Smaller select font */
             padding: 2px 4px;
         }
+        /* Success Message Modal */
+        #success-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -98,17 +104,23 @@
                 <img src="https://i.postimg.cc/ncvxtYTS/spr-logo.jpg" alt="Sandpiper Run Logo" class="w-28 sm:w-32 h-auto flex-shrink-0">
             </div>
 
-            <form action="#" method="POST">
+            <!-- Configuration Error Message -->
+            <div id="config-error" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
+                <p class="font-bold">Configuration Needed</p>
+                <p>Please replace the placeholder Supabase credentials in the HTML code with your own Project URL and Anon Key to enable form submission.</p>
+            </div>
+
+            <form id="access-request-form">
                 <div class="space-y-8">
                     <!-- Unit & Owner Info Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="md:col-span-2">
                             <label for="owner-name" class="block text-md font-bold text-gray-700">Owner's Name</label>
-                            <input type="text" id="owner-name" class="form-input w-full mt-1" placeholder="Enter full name">
+                            <input type="text" id="owner-name" class="form-input w-full mt-1" placeholder="Enter full name" required>
                         </div>
                         <div>
                             <label for="unit-number" class="block text-md font-bold text-gray-700">Unit #</label>
-                            <input type="text" id="unit-number" class="form-input w-full mt-1" placeholder="e.g., A10">
+                            <input type="text" id="unit-number" class="form-input w-full mt-1" placeholder="e.g., A10" required>
                         </div>
                     </div>
 
@@ -116,25 +128,25 @@
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="owner-email" class="block text-md font-bold text-gray-700">Owner's Email</label>
-                            <input type="email" id="owner-email" class="form-input w-full mt-1" placeholder="you@example.com">
+                            <input type="email" id="owner-email" class="form-input w-full mt-1" placeholder="you@example.com" required>
                         </div>
                         <div>
                             <label for="owner-phone" class="block text-md font-bold text-gray-700">Owner's Phone</label>
-                            <input type="tel" id="owner-phone" class="form-input w-full mt-1" placeholder="(XXX) XXX-XXXX">
+                            <input type="tel" id="owner-phone" class="form-input w-full mt-1" placeholder="(XXX) XXX-XXXX" required>
                         </div>
                     </div>
 
                     <!-- Vendor Info -->
                     <div>
                         <label for="vendor-name" class="block text-md font-bold text-gray-700">Vendor / Person Granted Access</label>
-                        <input type="text" id="vendor-name" class="form-input w-full mt-1" placeholder="Enter company or individual's name">
+                        <input type="text" id="vendor-name" class="form-input w-full mt-1" placeholder="Enter company or individual's name" required>
                     </div>
 
                     <!-- Date Requested -->
                     <div class="relative w-full sm:w-1/3">
                         <label for="date-requested" class="block text-md font-bold text-gray-700">Date Requested</label>
                         <div class="relative">
-                            <input type="text" id="date-requested" class="form-input w-full mt-1 cursor-pointer" placeholder="MM/DD/YYYY" readonly>
+                            <input type="text" id="date-requested" class="form-input w-full mt-1 cursor-pointer" placeholder="MM/DD/YYYY" readonly required>
                              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
                             </div>
@@ -151,7 +163,7 @@
                     <!-- Reason for Access -->
                     <div>
                         <label for="reason" class="block text-md font-bold text-gray-700">Reason for Access</label>
-                        <textarea id="reason" rows="4" class="form-input w-full mt-1 rounded-md border-2 border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="Please describe the reason for this request (e.g., HVAC repair, Property listing, etc.)"></textarea>
+                        <textarea id="reason" rows="4" class="form-input w-full mt-1 rounded-md border-2 border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="Please describe the reason for this request (e.g., HVAC repair, Property listing, etc.)" required></textarea>
                     </div>
 
                     <!-- Signature & Date -->
@@ -175,7 +187,7 @@
                         <div class="relative sm:col-span-1">
                              <label for="signature-date" class="block text-md font-bold text-gray-700">Date</label>
                              <div class="relative">
-                                <input type="text" id="signature-date" class="form-input w-full mt-1 cursor-pointer" readonly>
+                                <input type="text" id="signature-date" class="form-input w-full mt-1 cursor-pointer" readonly required>
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                     <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
                                 </div>
@@ -192,7 +204,7 @@
                 </div>
 
                 <div class="mt-12 text-center">
-                    <button type="submit" class="bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 shadow-lg">
+                    <button type="submit" id="submit-button" class="bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 shadow-lg">
                         Submit Request
                     </button>
                 </div>
@@ -200,229 +212,7 @@
         </div>
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // --- Phone Number Auto-Formatting ---
-    const phoneInput = document.getElementById('owner-phone');
-    phoneInput.addEventListener('input', function (e) {
-        let rawValue = e.target.value.replace(/\D/g, '');
-        if (rawValue.length > 10) {
-            rawValue = rawValue.substring(0, 10);
-        }
-
-        let formattedValue = '';
-        if (rawValue.length > 0) {
-            formattedValue = '(' + rawValue.substring(0, 3);
-        }
-        if (rawValue.length >= 4) {
-            formattedValue += ') ' + rawValue.substring(3, 6);
-        }
-        if (rawValue.length >= 7) {
-            formattedValue += '-' + rawValue.substring(6, 10);
-        }
-        e.target.value = formattedValue;
-    });
-
-    // --- Signature Pad Logic ---
-    const canvas = document.getElementById('signature-pad');
-    const signaturePad = new SignaturePad(canvas, {
-        backgroundColor: 'rgb(255, 255, 255)'
-    });
-    const typeSignatureInput = document.getElementById('type-signature-input');
-
-    function resizeCanvas() {
-        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        const ctx = canvas.getContext("2d");
-        ctx.scale(ratio, ratio);
-        signaturePad.clear(); 
-    }
-
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    function drawTextSignature(text) {
-        signaturePad.clear();
-        const ctx = canvas.getContext('2d');
-        ctx.font = "48px 'Dancing Script', cursive";
-        ctx.fillStyle = "#000";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, canvas.offsetWidth / 2, canvas.offsetHeight / 2);
-    }
-
-    typeSignatureInput.addEventListener('input', function() {
-        drawTextSignature(this.value);
-    });
-
-    signaturePad.addEventListener('beginStroke', () => {
-        typeSignatureInput.value = '';
-    });
-
-    document.getElementById('clear-signature').addEventListener('click', function () {
-        signaturePad.clear();
-        typeSignatureInput.value = '';
-    });
-
-    document.getElementById('upload-signature').addEventListener('change', function(event) {
-        typeSignatureInput.value = '';
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    signaturePad.clear();
-                    const ctx = canvas.getContext('2d');
-                    const scale = Math.min((canvas.width / window.devicePixelRatio) / img.width, (canvas.height / window.devicePixelRatio) / img.height);
-                    const x = ((canvas.width / window.devicePixelRatio) / 2) - (img.width / 2) * scale;
-                    const y = ((canvas.height / window.devicePixelRatio) / 2) - (img.height / 2) * scale;
-                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                }
-                img.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // --- Reusable Calendar Function ---
-    function initializeCalendar(dateInputElement, calendarContainerElement, options = {}) {
-        const monthSelect = calendarContainerElement.querySelector('.month-select');
-        const yearSelect = calendarContainerElement.querySelector('.year-select');
-        const calendarBody = calendarContainerElement.querySelector('.calendar-body');
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
-        let selectedDate = options.defaultDate ? new Date(options.defaultDate) : null;
-        if(selectedDate) selectedDate.setHours(0,0,0,0);
-
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-        months.forEach((month, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = month;
-            monthSelect.appendChild(option);
-        });
-
-        const startYear = today.getFullYear() - 10;
-        const endYear = today.getFullYear() + 10;
-        for (let i = startYear; i <= endYear; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            yearSelect.appendChild(option);
-        }
-
-        function formatDate(date) {
-            if (!date) return '';
-            const d = new Date(date);
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${month}/${day}/${year}`;
-        }
-
-        function generateCalendar(month, year) {
-            calendarBody.innerHTML = '';
-            const firstDayOfMonth = new Date(year, month).getDay();
-            const daysInMonth = 32 - new Date(year, month, 32).getDate();
-
-            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            dayNames.forEach(day => {
-                const dayNameEl = document.createElement('div');
-                dayNameEl.className = 'calendar-day-name';
-                dayNameEl.textContent = day;
-                calendarBody.appendChild(dayNameEl);
-            });
-
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                calendarBody.appendChild(document.createElement('div')).className = 'calendar-day empty';
-            }
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'calendar-day';
-                dayCell.textContent = i;
-                const cellDate = new Date(year, month, i);
-
-                if (cellDate.getTime() === today.getTime()) {
-                    dayCell.classList.add('today');
-                }
-                if (selectedDate && cellDate.getTime() === selectedDate.getTime()) {
-                    dayCell.classList.add('selected');
-                }
-
-                dayCell.addEventListener('click', () => {
-                    selectedDate = cellDate;
-                    dateInputElement.value = formatDate(selectedDate);
-                    calendarContainerElement.style.display = 'none';
-                    generateCalendar(currentMonth, currentYear);
-                });
-                calendarBody.appendChild(dayCell);
-            }
-            calendarBody.classList.add('calendar-grid');
-        }
-        
-        monthSelect.addEventListener('change', () => {
-            currentMonth = parseInt(monthSelect.value);
-            generateCalendar(currentMonth, currentYear);
-        });
-
-        yearSelect.addEventListener('change', () => {
-            currentYear = parseInt(yearSelect.value);
-            generateCalendar(currentMonth, currentYear);
-        });
-
-        dateInputElement.addEventListener('click', (event) => {
-            event.stopPropagation();
-            document.querySelectorAll('.calendar-container').forEach(c => c.style.display = 'none');
-            calendarContainerElement.style.display = 'block';
-        });
-        
-        if (selectedDate) {
-            dateInputElement.value = formatDate(selectedDate);
-            currentMonth = selectedDate.getMonth();
-            currentYear = selectedDate.getFullYear();
-        }
-        monthSelect.value = currentMonth;
-        yearSelect.value = currentYear;
-        generateCalendar(currentMonth, currentYear);
-    }
-
-    initializeCalendar(
-        document.getElementById('signature-date'),
-        document.getElementById('calendar-signature-container'),
-        { defaultDate: new Date() }
-    );
-    initializeCalendar(
-        document.getElementById('date-requested'),
-        document.getElementById('calendar-requested-container'),
-        { defaultDate: null }
-    );
-
-    document.addEventListener('click', (event) => {
-        const calendars = document.querySelectorAll('.calendar-container');
-        const dateInputs = document.querySelectorAll('.form-input[readonly]');
-        let targetIsCalendar = false;
-        
-        calendars.forEach(c => {
-            if (c.contains(event.target)) targetIsCalendar = true;
-        });
-        dateInputs.forEach(i => {
-            if (i === event.target) targetIsCalendar = true;
-        });
-
-        if (!targetIsCalendar) {
-            calendars.forEach(c => c.style.display = 'none');
-        }
-    });
-});
-</script>
-
-</body>
-</html>
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden opacity-0">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm text-center">
+            <div class="mx-auto flex items-cen
