@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandpiper Run - Unit Access Request</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Signature Pad Library -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +16,7 @@
             font-family: 'Inter', sans-serif;
         }
         .hero-header {
-            background-image: url('https://i.postimg.cc/Yq5FM0C7/form-background.jpg');
+            background-image: url('https://i.postimg.cc/XvrW9F0Y/spr8.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -90,6 +88,11 @@
         #success-modal {
             transition: opacity 0.3s ease-in-out;
         }
+        /* Disabled fieldset styling */
+        fieldset:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -104,110 +107,135 @@
                 <img src="https://i.postimg.cc/ncvxtYTS/spr-logo.jpg" alt="Sandpiper Run Logo" class="w-28 sm:w-32 h-auto flex-shrink-0">
             </div>
 
-            <!-- Configuration Error Message -->
-            <div id="config-error" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded" role="alert">
-                <p class="font-bold">Configuration Needed</p>
-                <p>Please replace the placeholder Supabase credentials in the HTML code with your own Project URL and Anon Key to enable form submission.</p>
-            </div>
+            <form id="access-request-form" name="access-request" method="POST" data-netlify="true">
+                <!-- Hidden input for Netlify to identify the form -->
+                <input type="hidden" name="form-name" value="access-request" />
 
-            <form id="access-request-form">
-                <div class="space-y-8">
-                    <!-- Unit & Owner Info Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2">
-                            <label for="owner-name" class="block text-md font-bold text-gray-700">Owner's Name</label>
-                            <input type="text" id="owner-name" class="form-input w-full mt-1" placeholder="Enter full name" required>
-                        </div>
+                <!-- Verification Section -->
+                <div class="mb-6 p-4 border border-gray-200 rounded-lg">
+                    <h2 class="font-bold text-lg mb-2 text-gray-800">Step 1: Verify Your Unit</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div>
                             <label for="unit-number" class="block text-md font-bold text-gray-700">Unit #</label>
-                            <input type="text" id="unit-number" class="form-input w-full mt-1" placeholder="e.g., A10" required>
-                        </div>
-                    </div>
-
-                    <!-- Contact Info Row -->
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="owner-email" class="block text-md font-bold text-gray-700">Owner's Email</label>
-                            <input type="email" id="owner-email" class="form-input w-full mt-1" placeholder="you@example.com" required>
+                            <input type="text" id="unit-number" name="unit-number-verify" class="form-input w-full mt-1" placeholder="e.g., A10" required maxlength="3">
                         </div>
                         <div>
-                            <label for="owner-phone" class="block text-md font-bold text-gray-700">Owner's Phone</label>
-                            <input type="tel" id="owner-phone" class="form-input w-full mt-1" placeholder="(XXX) XXX-XXXX" required>
+                            <label for="account-number" class="block text-md font-bold text-gray-700">Account #</label>
+                            <input type="text" id="account-number" name="account-number-verify" class="form-input w-full mt-1" placeholder="Last 4 digits" required maxlength="4">
                         </div>
+                        <button type="button" id="verify-button" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 transition-all h-10">Verify & Continue</button>
                     </div>
-
-                    <!-- Vendor Info -->
-                    <div>
-                        <label for="vendor-name" class="block text-md font-bold text-gray-700">Vendor / Person Granted Access</label>
-                        <input type="text" id="vendor-name" class="form-input w-full mt-1" placeholder="Enter company or individual's name" required>
-                    </div>
-
-                    <!-- Date Requested -->
-                    <div class="relative w-full sm:w-1/3">
-                        <label for="date-requested" class="block text-md font-bold text-gray-700">Date Requested</label>
-                        <div class="relative">
-                            <input type="text" id="date-requested" class="form-input w-full mt-1 cursor-pointer" placeholder="MM/DD/YYYY" readonly required>
-                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
-                            </div>
-                        </div>
-                        <div id="calendar-requested-container" class="calendar-container mt-2">
-                             <div class="flex items-center justify-between p-2 border-b">
-                                <select class="month-select calendar-header-select p-1 border rounded"></select>
-                                <select class="year-select calendar-header-select p-1 border rounded"></select>
-                            </div>
-                            <div class="calendar-body p-2"></div>
-                        </div>
-                    </div>
-
-                    <!-- Reason for Access -->
-                    <div>
-                        <label for="reason" class="block text-md font-bold text-gray-700">Reason for Access</label>
-                        <textarea id="reason" rows="4" class="form-input w-full mt-1 rounded-md border-2 border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="Please describe the reason for this request (e.g., HVAC repair, Property listing, etc.)" required></textarea>
-                    </div>
-
-                    <!-- Signature & Date -->
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 pt-6">
-                        <!-- Signature Part -->
-                        <div class="sm:col-span-3">
-                            <label class="block text-md font-bold text-gray-700">Owner's Signature</label>
-                            <input type="text" id="type-signature-input" class="form-input w-full mt-2" placeholder="Type your name to sign...">
-                            <div class="mt-2">
-                                <canvas id="signature-pad" class="w-full" height="150"></canvas>
-                            </div>
-                            <div class="flex items-center gap-4 mt-2">
-                                <button type="button" id="clear-signature" class="text-sm text-blue-600 hover:text-blue-800">Clear</button>
-                                <label for="upload-signature" class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
-                                    Upload Signature
-                                    <input type="file" id="upload-signature" class="hidden" accept="image/*">
-                                </label>
-                            </div>
-                        </div>
-                        <!-- Date Part -->
-                        <div class="relative sm:col-span-1">
-                             <label for="signature-date" class="block text-md font-bold text-gray-700">Date</label>
-                             <div class="relative">
-                                <input type="text" id="signature-date" class="form-input w-full mt-1 cursor-pointer" readonly required>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
-                                </div>
-                             </div>
-                            <div id="calendar-signature-container" class="calendar-container mt-2">
-                                <div class="flex items-center justify-between p-2 border-b">
-                                    <select class="month-select calendar-header-select p-1 border rounded"></select>
-                                    <select class="year-select calendar-header-select p-1 border rounded"></select>
-                                </div>
-                                <div class="calendar-body p-2"></div>
-                            </div>
-                        </div>
-                    </div>
+                     <p class="text-xs text-gray-500 mt-1">Last 4-digits of your SPR's H.O.A. account number</p>
+                    <div id="verification-message" class="mt-3 text-sm"></div>
                 </div>
 
-                <div class="mt-12 text-center">
-                    <button type="submit" id="submit-button" class="bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 shadow-lg">
-                        Submit Request
-                    </button>
-                </div>
+
+                <fieldset id="main-form-fieldset" disabled>
+                    <div class="space-y-8">
+                        <!-- Unit & Owner Info Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-3">
+                                <label for="owner-name" class="block text-md font-bold text-gray-700">Owner's Name</label>
+                                <input type="text" id="owner-name" name="owner-name" class="form-input w-full mt-1" placeholder="Enter full name" required>
+                            </div>
+                        </div>
+
+                        <!-- Contact Info Row -->
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="owner-email" class="block text-md font-bold text-gray-700">Owner's Email</label>
+                                <input type="email" id="owner-email" name="owner-email" class="form-input w-full mt-1" placeholder="you@example.com" required>
+                            </div>
+                            <div>
+                                <label for="owner-phone" class="block text-md font-bold text-gray-700">Owner's Phone</label>
+                                <input type="tel" id="owner-phone" name="owner-phone" class="form-input w-full mt-1" placeholder="(XXX) XXX-XXXX" required>
+                            </div>
+                        </div>
+
+                        <!-- Vendor Info -->
+                        <div>
+                            <label for="vendor-name" class="block text-md font-bold text-gray-700">Vendor / Person Granted Access</label>
+                            <input type="text" id="vendor-name" name="vendor-name" class="form-input w-full mt-1" placeholder="Enter company or individual's name" required>
+                        </div>
+
+                        <!-- Date Requested -->
+                        <div class="flex items-end gap-4">
+                            <div class="relative w-full sm:w-1/2">
+                                <label for="date-requested" class="block text-md font-bold text-gray-700">Date Requested</label>
+                                <div class="relative">
+                                    <input type="text" id="date-requested" name="date-requested" class="form-input w-full mt-1 cursor-pointer" placeholder="MM/DD/YYYY" readonly required>
+                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                </div>
+                                <div id="calendar-requested-container" class="calendar-container mt-2">
+                                     <div class="flex items-center justify-between p-2 border-b">
+                                        <select class="month-select calendar-header-select p-1 border rounded"></select>
+                                        <select class="year-select calendar-header-select p-1 border rounded"></select>
+                                    </div>
+                                    <div class="calendar-body p-2"></div>
+                                </div>
+                            </div>
+                            <p class="text-red-600 text-xs pb-2"><span class="font-bold">*</span>Please allow one full business day, between non-emergency Unit Access Requests and its Request Date.</p>
+                        </div>
+
+
+                        <!-- Reason for Access -->
+                        <div>
+                            <label for="reason" class="block text-md font-bold text-gray-700">Reason for Access</label>
+                            <textarea id="reason" name="reason" rows="4" class="form-input w-full mt-1 rounded-md border-2 border-gray-300 focus:border-blue-500 focus:ring-0" placeholder="Please describe the reason for this request (e.g., HVAC repair, Property listing, etc.)" required></textarea>
+                        </div>
+
+                        <!-- Authorization Disclaimer -->
+                        <div class="pt-4">
+                            <p class="text-red-600 text-sm text-center">By signing this form, I am giving Unlimited Resort Services authorization to facilitate in the access of my Unit to the above mentioned individual(s).</p>
+                        </div>
+
+                        <!-- Signature & Date -->
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 pt-6">
+                            <!-- Signature Part -->
+                            <div class="sm:col-span-3">
+                                <label class="block text-md font-bold text-gray-700">Owner's Signature</label>
+                                <input type="text" id="type-signature-input" class="form-input w-full mt-2" placeholder="Type your name to sign...">
+                                <div class="mt-2">
+                                    <canvas id="signature-pad" class="w-full" height="150"></canvas>
+                                </div>
+                                <!-- Hidden input to hold signature data for Netlify -->
+                                <input type="hidden" name="signature" id="signature-data">
+                                <div class="flex items-center gap-4 mt-2">
+                                    <button type="button" id="clear-signature" class="text-sm text-blue-600 hover:text-blue-800">Clear</button>
+                                    <label for="upload-signature" class="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+                                        Upload Signature
+                                        <input type="file" id="upload-signature" class="hidden" accept="image/*">
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- Date Part -->
+                            <div class="relative sm:col-span-1">
+                                 <label for="signature-date" class="block text-md font-bold text-gray-700">Date</label>
+                                 <div class="relative">
+                                    <input type="text" id="signature-date" name="signature-date" class="form-input w-full mt-1 cursor-pointer" readonly required>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm12 5H2v10h16V7z" clip-rule="evenodd" /></svg>
+                                    </div>
+                                 </div>
+                                <div id="calendar-signature-container" class="calendar-container mt-2">
+                                    <div class="flex items-center justify-between p-2 border-b">
+                                        <select class="month-select calendar-header-select p-1 border rounded"></select>
+                                        <select class="year-select calendar-header-select p-1 border rounded"></select>
+                                    </div>
+                                    <div class="calendar-body p-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 text-center">
+                        <button type="submit" id="submit-button" class="bg-blue-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 shadow-lg">
+                            Submit Request
+                        </button>
+                    </div>
+                </fieldset>
             </form>
         </div>
     </div>
@@ -215,4 +243,361 @@
     <!-- Success Modal -->
     <div id="success-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden opacity-0">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm text-center">
-            <div class="mx-auto flex items-cen
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Request Submitted!</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500">
+                    Your Unit Access Request has been successfully submitted.
+                </p>
+            </div>
+            <div class="mt-4">
+                <button id="close-modal-button" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Data for Verification ---
+    // This data is embedded from the provided spreadsheet.
+    const unitAccountData = {
+        'A1A': '73298', 'A1B': '73230', 'A1C': '73299', 'A1D': '73231', 'A1E': '73300', 'A1F': '73326', 'A1G': '73389', 'A1H': '73232', 'A1J': '73233', 'A1K': '73234', 'A1L': '73301', 'A1M': '73235', 'A1N': '73302', 'A1P': '73390', 'A1Q': '73293', 'A1R': '73303', 'A1S': '73236', 'A1T': '73304', 'A1U': '73237', 'A1V': '73305', 'A2A': '73306', 'A2B': '73238', 'A2C': '73307', 'A2D': '73239', 'A2E': '73308', 'A2F': '73327', 'A2G': '73391', 'A2H': '73240', 'A2J': '73241', 'A2K': '73242', 'A2L': '73309', 'A2M': '73243', 'A2N': '73310', 'A2P': '73392', 'A2Q': '73294', 'A2R': '73311', 'A2S': '73244', 'A2T': '73312', 'A2U': '73245', 'A2V': '73313', 'A3A': '73314', 'A3B': '73246', 'A3C': '73315', 'A3D': '73247', 'A3E': '73316', 'A3F': '73328', 'A3G': '73393', 'A3H': '73248', 'A3J': '73249', 'A3K': '73250', 'A3L': '73317', 'A3M': '73251', 'A3N': '73318', 'A3P': '73394', 'A3Q': '73295', 'A3R': '73319', 'A3S': '73252', 'A3T': '73320', 'A3U': '73253', 'A3V': '73321', 'B1A': '73254', 'B1B': '73255', 'B1C': '73256', 'B1D': '73257', 'B1E': '73258', 'B1F': '73259', 'B1G': '73260', 'B1H': '73261', 'B2A': '73262', 'B2B': '73263', 'B2C': '73264', 'B2D': '73265', 'B2E': '73266', 'B2F': '73267', 'B2G': '73268', 'B2H': '73269', 'B3A': '73270', 'B3B': '73271', 'B3C': '73272', 'B3D': '73273', 'B3E': '73274', 'B3F': '73275', 'B3G': '73276', 'B3H': '73277', 'B4A': '73278', 'B4B': '73279', 'B4C': '73280', 'B4D': '73281', 'B4E': '73282', 'B4F': '73283', 'B4G': '73284', 'B4H': '73285', 'B5A': '73286', 'B5B': '73287', 'B5C': '73288', 'B5D': '73289', 'B5E': '73290', 'B5F': '73291', 'B5G': '73292', 'B5H': '73293', 'C1A': '73374', 'C1B': '73322', 'C1C': '73323', 'C1D': '73324', 'C1E': '73325', 'C1F': '73328', 'C1G': '73375', 'C2A': '73376', 'C2B': '73329', 'C2C': '73330', 'C2D': '73331', 'C2E': '73332', 'C2F': '73333', 'C2G': '73377', 'C3A': '73378', 'C3B': '73334', 'C3C': '73335', 'C3D': '73336', 'C3E': '73337', 'C3F': '73338', 'C3G': '73379', 'C4A': '73380', 'C4B': '73339', 'C4C': '73340', 'C4D': '73341', 'C4E': '73342', 'C4F': '73343', 'C4G': '73381', 'C5A': '73382', 'C5B': '73344', 'C5C': '73345', 'C5D': '73346', 'C5E': '73347', 'C5F': '73348', 'C5G': '73383', 'D1A': '73384', 'D1B': '73349', 'D1C': '73350', 'D1D': '73351', 'D1E': '73352', 'D1F': '73353', 'D2A': '73385', 'D2B': '73354', 'D2C': '73355', 'D2D': '73356', 'D2E': '73357', 'D2F': '73358', 'D3A': '73386', 'D3B': '73359', 'D3C': '73360', 'D3D': '73361', 'D3E': '73362', 'D3F': '73363', 'D4A': '73387', 'D4B': '73364', 'D4C': '73365', 'D4D': '73366', 'D4E': '73367', 'D4F': '73368', 'D5A': '73388', 'D5B': '73369', 'D5C': '73370', 'D5D': '73371', 'D5E': '73372', 'D5F': '73373'
+    };
+
+    // --- Verification Logic ---
+    const unitNumberInput = document.getElementById('unit-number');
+    const accountNumberInput = document.getElementById('account-number');
+    const verifyButton = document.getElementById('verify-button');
+    const verificationMessage = document.getElementById('verification-message');
+    const mainFormFieldset = document.getElementById('main-form-fieldset');
+
+    verifyButton.addEventListener('click', () => {
+        const unit = unitNumberInput.value.toUpperCase();
+        const accountLast4 = accountNumberInput.value;
+
+        if (unitAccountData[unit] && unitAccountData[unit].endsWith(accountLast4)) {
+            verificationMessage.textContent = 'Verification successful! You may now fill out the form.';
+            verificationMessage.className = 'mt-3 text-sm text-green-600';
+            mainFormFieldset.disabled = false;
+            unitNumberInput.disabled = true;
+            accountNumberInput.disabled = true;
+            verifyButton.disabled = true;
+            verifyButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+        } else {
+            verificationMessage.textContent = 'Invalid Unit # or Account #. Please try again.';
+            verificationMessage.className = 'mt-3 text-sm text-red-600';
+            unitNumberInput.value = '';
+            accountNumberInput.value = '';
+            unitNumberInput.focus();
+        }
+    });
+
+    // --- Signature Pad Logic ---
+    const canvas = document.getElementById('signature-pad');
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+    const typeSignatureInput = document.getElementById('type-signature-input');
+
+    function resizeCanvas() {
+        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(ratio, ratio);
+        signaturePad.clear(); 
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function drawTextSignature(text) {
+        signaturePad.clear();
+        const ctx = canvas.getContext('2d');
+        ctx.font = "48px 'Dancing Script', cursive";
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.offsetWidth / 2, canvas.offsetHeight / 2);
+    }
+
+    typeSignatureInput.addEventListener('input', function() {
+        drawTextSignature(this.value);
+    });
+
+    signaturePad.addEventListener('beginStroke', () => {
+        typeSignatureInput.value = '';
+    });
+
+    document.getElementById('clear-signature').addEventListener('click', function () {
+        signaturePad.clear();
+        typeSignatureInput.value = '';
+    });
+
+    document.getElementById('upload-signature').addEventListener('change', function(event) {
+        typeSignatureInput.value = '';
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    signaturePad.clear();
+                    const ctx = canvas.getContext('2d');
+                    const scale = Math.min((canvas.width / window.devicePixelRatio) / img.width, (canvas.height / window.devicePixelRatio) / img.height);
+                    const x = ((canvas.width / window.devicePixelRatio) / 2) - (img.width / 2) * scale;
+                    const y = ((canvas.height / window.devicePixelRatio) / 2) - (img.height / 2) * scale;
+                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // --- Netlify Form Submission Logic ---
+    const form = document.getElementById('access-request-form');
+    const submitButton = document.getElementById('submit-button');
+    const successModal = document.getElementById('success-modal');
+    const closeModalButton = document.getElementById('close-modal-button');
+    const signatureDataInput = document.getElementById('signature-data');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!signaturePad.isEmpty()) {
+            signatureDataInput.value = signaturePad.toDataURL();
+        } else {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 400;
+            tempCanvas.height = 150;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.font = "48px 'Dancing Script', cursive";
+            tempCtx.textAlign = "center";
+            tempCtx.textBaseline = "middle";
+            tempCtx.fillText(typeSignatureInput.value, 200, 75);
+            signatureDataInput.value = tempCanvas.toDataURL();
+        }
+
+        if (!signatureDataInput.value && !typeSignatureInput.value) {
+             alert("Please provide a signature by typing, drawing, or uploading.");
+             return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+
+        const formData = new FormData(form);
+        
+        fetch("/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams(formData).toString()
+        })
+        .then(() => {
+            successModal.classList.remove('hidden');
+            setTimeout(() => successModal.classList.remove('opacity-0'), 10);
+        })
+        .catch(error => {
+            alert(`Error: ${error}`);
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit Request';
+        });
+    });
+
+    closeModalButton.addEventListener('click', () => {
+        successModal.classList.add('opacity-0');
+        setTimeout(() => {
+            successModal.classList.add('hidden');
+            form.reset();
+            signaturePad.clear();
+            mainFormFieldset.disabled = true; // Re-disable form after submission
+            unitNumberInput.disabled = false;
+            accountNumberInput.disabled = false;
+            verifyButton.disabled = false;
+            verifyButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            verificationMessage.textContent = '';
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit Request';
+        }, 300);
+    });
+
+    // --- Reusable Calendar Function ---
+    function initializeCalendar(dateInputElement, calendarContainerElement, options = {}) {
+        const monthSelect = calendarContainerElement.querySelector('.month-select');
+        const yearSelect = calendarContainerElement.querySelector('.year-select');
+        const calendarBody = calendarContainerElement.querySelector('.calendar-body');
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+        let selectedDate = options.defaultDate ? new Date(options.defaultDate) : null;
+        if(selectedDate) selectedDate.setHours(0,0,0,0);
+
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = month;
+            monthSelect.appendChild(option);
+        });
+
+        const startYear = today.getFullYear() - 10;
+        const endYear = today.getFullYear() + 10;
+        for (let i = startYear; i <= endYear; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearSelect.appendChild(option);
+        }
+
+        function formatDate(date) {
+            if (!date) return '';
+            const d = new Date(date);
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${month}/${day}/${year}`;
+        }
+
+        function generateCalendar(month, year) {
+            calendarBody.innerHTML = '';
+            const firstDayOfMonth = new Date(year, month).getDay();
+            const daysInMonth = 32 - new Date(year, month, 32).getDate();
+
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayNames.forEach(day => {
+                const dayNameEl = document.createElement('div');
+                dayNameEl.className = 'calendar-day-name';
+                dayNameEl.textContent = day;
+                calendarBody.appendChild(dayNameEl);
+            });
+
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarBody.appendChild(document.createElement('div')).className = 'calendar-day empty';
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.textContent = i;
+                const cellDate = new Date(year, month, i);
+
+                if (cellDate.getTime() === today.getTime()) {
+                    dayCell.classList.add('today');
+                }
+                if (selectedDate && cellDate.getTime() === selectedDate.getTime()) {
+                    dayCell.classList.add('selected');
+                }
+
+                dayCell.addEventListener('click', () => {
+                    selectedDate = cellDate;
+                    dateInputElement.value = formatDate(selectedDate);
+                    calendarContainerElement.style.display = 'none';
+                    generateCalendar(currentMonth, currentYear);
+                });
+                calendarBody.appendChild(dayCell);
+            }
+            calendarBody.classList.add('calendar-grid');
+        }
+        
+        monthSelect.addEventListener('change', () => {
+            currentMonth = parseInt(monthSelect.value);
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        yearSelect.addEventListener('change', () => {
+            currentYear = parseInt(yearSelect.value);
+            generateCalendar(currentMonth, currentYear);
+        });
+
+        dateInputElement.addEventListener('click', (event) => {
+            event.stopPropagation();
+            document.querySelectorAll('.calendar-container').forEach(c => c.style.display = 'none');
+            calendarContainerElement.style.display = 'block';
+        });
+        
+        if (selectedDate) {
+            dateInputElement.value = formatDate(selectedDate);
+            currentMonth = selectedDate.getMonth();
+            currentYear = selectedDate.getFullYear();
+        }
+        monthSelect.value = currentMonth;
+        yearSelect.value = currentYear;
+        generateCalendar(currentMonth, currentYear);
+    }
+
+    initializeCalendar(
+        document.getElementById('signature-date'),
+        document.getElementById('calendar-signature-container'),
+        { defaultDate: new Date() }
+    );
+    initializeCalendar(
+        document.getElementById('date-requested'),
+        document.getElementById('calendar-requested-container'),
+        { defaultDate: null }
+    );
+
+    document.addEventListener('click', (event) => {
+        const calendars = document.querySelectorAll('.calendar-container');
+        const dateInputs = document.querySelectorAll('.form-input[readonly]');
+        let targetIsCalendar = false;
+        
+        calendars.forEach(c => {
+            if (c.contains(event.target)) targetIsCalendar = true;
+        });
+        dateInputs.forEach(i => {
+            if (i === event.target) targetIsCalendar = true;
+        });
+
+        if (!targetIsCalendar) {
+            calendars.forEach(c => c.style.display = 'none');
+        }
+    });
+
+    // --- Input Formatting ---
+    document.getElementById('owner-phone').addEventListener('input', function (e) {
+        let rawValue = e.target.value.replace(/\D/g, '');
+        if (rawValue.length > 10) {
+            rawValue = rawValue.substring(0, 10);
+        }
+
+        let formattedValue = '';
+        if (rawValue.length > 0) {
+            formattedValue = '(' + rawValue.substring(0, 3);
+        }
+        if (rawValue.length >= 4) {
+            formattedValue += ') ' + rawValue.substring(3, 6);
+        }
+        if (rawValue.length >= 7) {
+            formattedValue += '-' + rawValue.substring(6, 10);
+        }
+        e.target.value = formattedValue;
+    });
+
+    document.getElementById('unit-number').addEventListener('input', function(e) {
+        let value = e.target.value;
+        let sanitizedValue = value.replace(/[^a-zA-Z0-9]/g, '');
+        let uppercasedValue = sanitizedValue.toUpperCase();
+        e.target.value = uppercasedValue.substring(0, 3);
+    });
+
+    document.getElementById('account-number').addEventListener('input', function(e) {
+        let value = e.target.value;
+        let sanitizedValue = value.replace(/[^0-9]/g, '');
+        e.target.value = sanitizedValue.substring(0, 4);
+    });
+});
+</script>
+
+</body>
+</html>
